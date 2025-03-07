@@ -1,0 +1,14 @@
+{
+  "name": "docmanager",
+  "version": "1.0.0",
+  "description": "Sistema de Gestión de Documentación con Django y Tailwind CSS",
+  "scripts": {
+    "build": "tailwindcss build -i static/css/tailwind.css -o static/css/main.css",
+    "watch": "tailwindcss build -i static/css/tailwind.css -o static/css/main.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.3",
+    "autoprefixer": "^10.4.15",
+    "postcss": "^8.4.29"
+  }
+} 

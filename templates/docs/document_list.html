@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Documentos{% endblock %}
+
+{% block content %}
+<div class="py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-900">Documentos</h1>
+            <a href="{% url 'docs:document_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus mr-2"></i> Nuevo documento
+            </a>
+        </div>
+
+        <!-- Filtros y búsqueda -->
+        <div class="mt-6 bg-white shadow rounded-lg p-4">
+            <form method="get" action="{% url 'docs:document_list' %}" class="flex flex-col md:flex-row gap-4 items-end">
+                <div class="flex-1">
+                    <label for="id_search" class="form-label">Buscar</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" name="search" id="id_search" class="form-input pl-10" placeholder="Buscar por título, descripción..." value="{{ request.GET.search|default:'' }}">
+                    </div>
+                </div>
+                <div class="w-full md:w-48">
+                    <label for="id_category" class="form-label">Categoría</label>
+                    <select name="category" id="id_category" class="form-input">
+                        <option value="">Todas las categorías</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"i" %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="w-full md:w-48">
+                    <label for="id_tag" class="form-label">Etiqueta</label>
+                    <select name="tag" id="id_tag" class="form-input">
+                        <option value="">Todas las etiquetas</option>
+                        {% for tag in tags %}
+                        <option value="{{ tag.id }}" {% if request.GET.tag == tag.id|stringformat:"i" %}selected{% endif %}>
+                            {{ tag.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="w-full md:w-auto">
+                    <button type="submit" class="btn btn-primary w-full md:w-auto">
+                        <i class="fas fa-filter mr-2"></i> Filtrar
+                    </button>
+                </div>
+                {% if request.GET.search or request.GET.category or request.GET.tag %}
+                <div class="w-full md:w-auto">
+                    <a href="{% url 'docs:document_list' %}" class="btn btn-outline w-full md:w-auto">
+                        <i class="fas fa-times mr-2"></i> Limpiar filtros
+                    </a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Lista de documentos -->
+        <div class="mt-6 bg-white shadow rounded-lg overflow-hidden">
+            {% if documents %}
+            <ul class="divide-y divide-gray-200">
+                {% for document in documents %}
+                <li class="p-6 hover:bg-gray-50">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-md bg-primary-100 text-primary-600">
+                                <i class="fas fa-file-alt text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h2 class="text-lg font-medium text-gray-900">
+                                    <a href="{% url 'docs:document_detail' document.id %}" class="hover:text-primary-600">
+                                        {{ document.title }}
+                                    </a>
+                                </h2>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    {{ document.description|default:"Sin descripción"|truncatechars:150 }}
+                                </p>
+                                <div class="mt-2 flex flex-wrap items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                                        <i class="fas fa-folder-open mr-1"></i> {{ document.category.name }}
+                                    </span>
+                                    {% for tag in document.tags.all %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <i class="fas fa-tag mr-1"></i> {{ tag.name }}
+                                    </span>
+                                    {% endfor %}
+                                    {% if document.is_public %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-globe mr-1"></i> Público
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-lock mr-1"></i> Privado
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 md:mt-0 flex flex-col items-start md:items-end">
+                            <div class="text-sm text-gray-500">
+                                <i class="fas fa-user mr-1"></i> {{ document.uploaded_by.get_full_name|default:document.uploaded_by.username }}
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                <i class="fas fa-calendar mr-1"></i> {{ document.created_at|date:"j M, Y" }}
+                            </div>
+                            <div class="mt-2 flex space-x-2">
+                                <a href="{% url 'docs:document_detail' document.id %}" class="text-primary-600 hover:text-primary-900 text-sm font-medium">
+                                    <i class="fas fa-eye mr-1"></i> Ver
+                                </a>
+                                <a href="{% url 'docs:document_download' document.id %}" class="text-primary-600 hover:text-primary-900 text-sm font-medium">
+                                    <i class="fas fa-download mr-1"></i> Descargar
+                                </a>
+                                {% if document.uploaded_by == user or user.is_staff %}
+                                <a href="{% url 'docs:document_update' document.id %}" class="text-primary-600 hover:text-primary-900 text-sm font-medium">
+                                    <i class="fas fa-edit mr-1"></i> Editar
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <!-- Paginación -->
+            {% if is_paginated %}
+            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Anterior
+                    </a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Siguiente
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Mostrando <span class="font-medium">{{ page_obj.start_index }}</span> a <span class="font-medium">{{ page_obj.end_index }}</span> de <span class="font-medium">{{ paginator.count }}</span> resultados
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Anterior</span>
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            {% endif %}
+                            
+                            {% for i in paginator.page_range %}
+                                {% if page_obj.number == i %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-primary-500 bg-primary-50 text-sm font-medium text-primary-600">
+                                    {{ i }}
+                                </span>
+                                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                <a href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    {{ i }}
+                                </a>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Siguiente</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <!-- Estado vacío -->
+            <div class="text-center py-16">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No hay documentos</h3>
+                <p class="mt-1 text-sm text-gray-500">Comienza subiendo tu primer documento.</p>
+                <div class="mt-6">
+                    <a href="{% url 'docs:document_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus mr-2"></i> Subir documento
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 
