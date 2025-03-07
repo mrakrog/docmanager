@@ -15,7 +15,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-for-dev')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'  # Por defecto True para desarrollo
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# Configurar hosts permitidos - añadir dominio de Vercel
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -96,7 +98,8 @@ if DEBUG:
     # Reduce la seguridad en desarrollo para mostrar información detallada de errores
     AUTH_PASSWORD_VALIDATORS = []
     CORS_ALLOW_ALL_ORIGINS = True
-    ALLOWED_HOSTS = ['*']
+    # No sobreescribir ALLOWED_HOSTS aquí para mantener la compatibilidad con Vercel
+    # ALLOWED_HOSTS = ['*']
 
 # Internationalization
 LANGUAGE_CODE = 'es-es'

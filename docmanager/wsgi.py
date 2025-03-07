@@ -10,5 +10,5 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'docmanager.settings')
 
 application = get_wsgi_application()
 
-# Configuración para Vercel
+# Esta línea específica es importante para Vercel
 app = application 
