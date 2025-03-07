@@ -84,8 +84,28 @@ Accede a: https://127.0.0.1:8443/
 
 ## 🌐 Despliegue en Vercel
 
-El proyecto está configurado para ser desplegado en Vercel siguiendo la documentación oficial:
-[Deploying Django to Vercel](https://vercel.com/guides/deploying-django-to-vercel)
+Este proyecto está configurado para ser desplegado fácilmente en Vercel:
+
+1. **Requisitos previos**:
+   - Una cuenta en [Vercel](https://vercel.com)
+   - Proyecto subido a GitHub, GitLab o Bitbucket
+
+2. **Pasos para el despliegue**:
+   - Ve a tu dashboard en Vercel
+   - Haz clic en "Import Project" o "New Project"
+   - Selecciona tu repositorio
+   - Configura las siguientes variables de entorno:
+     - `SECRET_KEY`: Una cadena secreta larga y aleatoria
+     - `DEBUG`: Establece como `False`
+     - `ALLOWED_HOSTS`: Incluye el dominio de Vercel (*.vercel.app)
+   - Haz clic en "Deploy"
+
+3. **Solución de problemas comunes**:
+   - Si encuentras errores durante el despliegue, ejecuta `python vercel_check.py` para verificar tu configuración
+   - Verifica los logs de construcción en Vercel para identificar problemas específicos
+   - Asegúrate de que los archivos estáticos se están construyendo correctamente
+
+Para más información, consulta la [documentación oficial de Vercel para Django](https://vercel.com/guides/deploying-django-to-vercel).
 
 ## 🗂️ Estructura del Proyecto
 
@@ -101,6 +121,11 @@ El proyecto está configurado para ser desplegado en Vercel siguiendo la documen
 Si encuentras algún problema, puedes ejecutar el script de diagnóstico:
 ```bash
 python debug.py
+```
+
+Para problemas específicos de Vercel:
+```bash
+python vercel_check.py
 ```
 
 ## 📜 Licencia
